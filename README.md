@@ -31,9 +31,19 @@ var xmlrpc = require('xmlrpc')
 
 // Creates an XML-RPC server to listen to XML-RPC method calls
 var server = xmlrpc.createServer({ host: 'localhost', port: 9090 })
+
 // Handle methods not found
 server.on('NotFound', function(method, params) {
   console.log('Method ' + method + ' does not exist');
+})
+// Handle methods without listener
+server.on('default', function (err, params,methodName, callback) {
+  console.log('Method call params for \'methodName\': ' + params)
+
+  // ...perform an action...
+
+  // Send a method response with a value
+  callback(null, 'methodName')
 })
 // Handle method calls by listening for events with the method call name
 server.on('anAction', function (err, params, callback) {
@@ -51,7 +61,7 @@ console.log('XML-RPC server listening on port 9091')
 setTimeout(function () {
   // Creates an XML-RPC client. Passes the host information on where to
   // make the XML-RPC calls.
-  var client = xmlrpc.createClient({ host: 'localhost', port: 9090, path: '/'})
+  var client = xmlrpc.createClient({ host: 'localhost', port: 9090, path: '/', timeout:5000})
 
   // Sends a method call to the XML-RPC server
   client.methodCall('anAction', ['aParam'], function (error, value) {
@@ -128,7 +138,8 @@ manually by the setCookie/getCookie call.
 var client = xmlrpc.createClient({
   host: 'localhost',
   port: 9090,
-  cookies: true
+  cookies: true,
+  timeout: 5000
 });
 
 client.setCookie('login', 'bilbo');
